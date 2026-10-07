@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F7FBFF">
+<title>26Q19 · 班级空间</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;}
+  :root{
+    --blue-900:#123A63;--blue-700:#1E5FA8;--blue-500:#3B82D6;
+    --blue-300:#8FBEF0;--blue-100:#E4F0FF;--text:#1F3550;
+    --muted:#6B87A6;--warm:#FFB86B;--danger:#E8604C;
+  }
+  html{background:#F7FBFF;scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+    color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;overflow-x:hidden;min-height:100vh;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-1;
+    background:
+      radial-gradient(900px 520px at 8% -12%,#DCEBFF 0%,rgba(220,235,255,0) 62%),
+      radial-gradient(720px 480px at 102% -4%,#E9F4FF 0%,rgba(233,244,255,0) 58%),
+      radial-gradient(680px 420px at 50% 112%,#FFF2E2 0%,rgba(255,242,226,0) 62%);
+  }
+  img{max-width:100%;display:block;}
+
+  .cloud-status{
+    max-width:1080px;margin:12px auto 0;padding:10px 16px;
+    border-radius:14px;font-size:13px;font-weight:600;line-height:1.5;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .cloud-status.cloud{background:#E7F6EC;color:#1E7A44;border:1px solid #BFE8CD;}
+  .cloud-status.local{background:#FFF4E0;color:#8A5A00;border:1px solid #FFDFA8;}
+
+  .nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.85);
+    -webkit-backdrop-filter:saturate(180%) blur(14px);
+    backdrop-filter:saturate(180%) blur(14px);
+    border-bottom:1px solid rgba(59,130,214,.10);
+    margin-top:12px;
+  }
+  .nav-inner{
+    max-width:1080px;margin:0 auto;padding:11px 20px 8px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;min-width:0;flex:none;}
+  .brand-badge{
+    flex:none;padding:6px 15px;border-radius:999px;
+    background:linear-gradient(135deg,#4A90E2,#2C6BB5);color:#fff;
+    font-weight:800;font-size:15px;letter-spacing:.4px;
+    box-shadow:0 6px 16px rgba(59,130,214,.30);
+  }
+  .brand-text{font-size:13.5px;color:var(--muted);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  .nav-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex:none;}
+  .online-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:700;
+    background:#E7F6EC;color:#1E7A44;border:1px solid #BFE8CD;white-space:nowrap;
+  }
+  .online-dot{
+    width:8px;height:8px;border-radius:50%;background:#22A854;
+    box-shadow:0 0 0 0 rgba(34,168,84,.6);animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(34,168,84,.6);}
+    70%{box-shadow:0 0 0 7px rgba(34,168,84,0);}
+    100%{box-shadow:0 0 0 0 rgba(34,168,84,0);}
+  }
+  .user-chip{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:700;
+    background:linear-gradient(135deg,#EAF3FF,#F8FCFF);color:var(--blue-700);
+    border:1px solid rgba(59,130,214,.20);cursor:pointer;white-space:nowrap;
+    max-width:150px;
+  }
+  .user-chip .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .user-chip .avatar{
+    width:20px;height:20px;border-radius:50%;flex:none;
+    background:linear-gradient(135deg,#4A90E2,#8FBEF0);
+    color:#fff;font-size:11px;font-weight:800;
+    display:grid;place-items:center;text-transform:uppercase;
+  }
+  .login-btn{
+    padding:6px 14px;border-radius:999px;border:none;
+    background:linear-gradient(135deg,#4A90E2,#2E6FBE);color:#fff;
+    font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
+    box-shadow:0 6px 14px rgba(59,130,214,.28);white-space:nowrap;
+  }
+  .login-btn:active{transform:scale(.96);}
+
+  .tabs{
+    display:flex;gap:6px;padding:0 16px 10px;max-width:1080px;margin:0 auto;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:none;padding:8px 16px;border-radius:999px;border:1px solid transparent;
+    background:transparent;color:var(--blue-700);font-size:14px;font-weight:600;
+    font-family:inherit;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s,box-shadow .2s;
+  }
+  .tab:hover{background:var(--blue-100);}
+  .tab.active{background:linear-gradient(135deg,#4A90E2,#2E6FBE);color:#fff;box-shadow:0 6px 16px rgba(59,130,214,.28);}
+
+  .panel{display:none;animation:fadeIn .3s ease;}
+  .panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  .hero{max-width:1080px;margin:0 auto;padding:clamp(40px,9vw,70px) 20px clamp(30px,6vw,48px);text-align:center;}
+  .hero-eyebrow{
+    display:inline-block;margin:0 0 18px;padding:6px 16px;border-radius:999px;
+    background:#fff;border:1px solid rgba(59,130,214,.18);color:var(--blue-700);
+    font-size:13px;font-weight:600;box-shadow:0 4px 14px rgba(59,130,214,.10);
+  }
+  .hero h1{margin:0 0 16px;font-size:clamp(32px,7.5vw,52px);line-height:1.25;letter-spacing:-.5px;font-weight:800;color:var(--blue-900);}
+  .grad{background:linear-gradient(120deg,#3B82D6,#63A4E8 58%,var(--warm));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero-sub{margin:0 auto 32px;max-width:520px;color:var(--muted);font-size:clamp(15px,2.7vw,17px);}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:12px 24px;border-radius:999px;border:1px solid transparent;
+    font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;
+    text-decoration:none;white-space:nowrap;transition:transform .2s,box-shadow .2s,background .2s;
+    touch-action:manipulation;
+  }
+  .btn-primary{background:linear-gradient(135deg,#4A90E2,#2E6FBE);color:#fff;box-shadow:0 10px 24px rgba(59,130,214,.30);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(59,130,214,.38);}
+  .btn-ghost{background:#fff;color:var(--blue-700);border-color:rgba(59,130,214,.22);box-shadow:0 6px 18px rgba(59,130,214,.10);}
+  .btn-ghost:hover{transform:translateY(-2px);}
+  .btn:active{transform:translateY(0) scale(.98);}
+  .btn-sm{padding:9px 18px;font-size:14px;}
+  .btn[disabled]{opacity:.55;pointer-events:none;}
+
+  .section{max-width:1080px;margin:0 auto;padding:22px 20px 48px;}
+  .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+  .section-head h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.2px;color:var(--blue-900);}
+  .count{flex:none;font-size:13px;color:var(--muted);background:#fff;border:1px solid rgba(59,130,214,.16);padding:3px 12px;border-radius:999px;}
+
+  .empty{
+    background:#fff;border:1.5px dashed rgba(59,130,214,.28);border-radius:24px;
+    padding:clamp(36px,8vw,54px) 24px;text-align:center;box-shadow:0 12px 32px rgba(59,130,214,.07);
+  }
+  .empty-icon{
+    width:74px;height:74px;margin:0 auto 18px;border-radius:22px;
+    background:linear-gradient(135deg,#EAF3FF,#F8FCFF);display:grid;place-items:center;
+  }
+  .empty h3{margin:0 0 8px;font-size:18px;color:var(--blue-900);font-weight:700;}
+  .empty p{margin:0 0 24px;color:var(--muted);font-size:14.5px;}
+  .mini-empty{margin:0;padding:20px;text-align:center;color:var(--muted);font-size:14px;background:#fff;border-radius:16px;border:1.5px dashed rgba(59,130,214,.20);}
+
+  .records{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));}
+  .record{
+    position:relative;background:#fff;border-radius:20px;padding:22px;
+    border:1px solid rgba(59,130,214,.12);box-shadow:0 10px 26px rgba(59,130,214,.08);
+    transition:transform .22s,box-shadow .22s;
+  }
+  .record:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(59,130,214,.14);}
+  .record-date{
+    display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;
+    color:var(--blue-700);background:var(--blue-100);padding:4px 12px;border-radius:999px;
+    margin-bottom:12px;max-width:calc(100% - 34px);
+  }
+  .record h3{margin:0 0 8px;font-size:17px;color:var(--blue-900);font-weight:700;line-height:1.45;}
+  .record p{margin:0;color:#55708C;font-size:14.5px;white-space:pre-wrap;word-break:break-word;}
+  .record-author{
+    margin-top:10px;font-size:12px;color:var(--muted);
+    display:flex;align-items:center;gap:5px;
+  }
+
+  .icon-btn{
+    width:30px;height:30px;border-radius:50%;border:none;background:transparent;
+    color:#A9BFD6;font-size:14px;line-height:1;cursor:pointer;
+    display:grid;place-items:center;transition:background .2s,color .2s;font-family:inherit;
+  }
+  .icon-btn:hover{background:var(--blue-100);color:var(--blue-700);}
+  .icon-btn.danger:hover{background:#FFEDE8;color:var(--danger);}
+  .card-actions{position:absolute;top:13px;right:13px;display:flex;gap:2px;}
+
+  .photo-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+  .photo-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
+  .photo-item{
+    position:relative;border-radius:16px;overflow:hidden;background:#EAF3FF;
+    aspect-ratio:1;box-shadow:0 8px 20px rgba(59,130,214,.10);cursor:pointer;
+  }
+  .photo-item img{width:100%;height:100%;object-fit:cover;transition:transform .3s;}
+  .photo-item:hover img{transform:scale(1.05);}
+  .photo-del{
+    position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;
+    border:none;background:rgba(255,255,255,.9);color:var(--danger);font-size:13px;
+    cursor:pointer;display:grid;place-items:center;box-shadow:0 3px 8px rgba(0,0,0,.15);
+  }
+  .photo-del:hover{background:#fff;}
+  .photo-note{
+    margin-top:18px;font-size:13px;color:var(--muted);text-align:center;
+    padding:12px;background:#fff;border-radius:14px;border:1px solid rgba(59,130,214,.12);
+  }
+
+  .game-wrap{max-width:460px;margin:0 auto;}
+  .game-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
+  .score-box{
+    background:#fff;border-radius:16px;padding:8px 18px;display:flex;align-items:baseline;gap:8px;
+    border:1px solid rgba(59,130,214,.14);box-shadow:0 6px 18px rgba(59,130,214,.10);
+  }
+  .score-label{font-size:12px;color:var(--muted);font-weight:600;}
+  .score-value{font-size:22px;font-weight:800;color:var(--blue-700);}
+  .game-board{
+    display:grid;grid-template-columns:repeat(8,1fr);gap:4px;
+    background:#EAF3FF;padding:8px;border-radius:18px;
+    box-shadow:0 10px 30px rgba(59,130,214,.14);user-select:none;touch-action:manipulation;
+  }
+  .game-tile{
+    aspect-ratio:1;display:grid;place-items:center;
+    font-size:clamp(16px,4.2vw,24px);background:#fff;border-radius:9px;
+    cursor:pointer;transition:transform .15s,background .15s,box-shadow .15s;
+    box-shadow:0 2px 4px rgba(59,130,214,.08);
+  }
+  .game-tile.selected{background:#CFE4FF;transform:scale(1.08);box-shadow:0 4px 14px rgba(59,130,214,.35);}
+  .game-tile.empty{background:transparent;box-shadow:none;cursor:default;}
+  .game-hint{margin-top:16px;text-align:center;font-size:13.5px;color:var(--muted);}
+
+  .group-title{
+    display:flex;align-items:center;gap:8px;margin:26px 0 14px;
+    font-size:16px;font-weight:800;color:var(--blue-900);
+  }
+  .group-title:first-child{margin-top:0;}
+  .group-title .bar{width:4px;height:16px;border-radius:2px;background:linear-gradient(180deg,#4A90E2,#8FBEF0);}
+  .member-list{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));}
+  .member-card{
+    position:relative;display:flex;align-items:center;gap:12px;
+    background:#fff;border-radius:16px;padding:14px 16px;
+    border:1px solid rgba(59,130,214,.12);box-shadow:0 6px 18px rgba(59,130,214,.07);
+    transition:transform .2s,box-shadow .2s;
+  }
+  .member-card:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(59,130,214,.13);}
+  .member-avatar{
+    flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#E4F0FF,#FFF3E3);font-size:22px;
+  }
+  .member-info{min-width:0;flex:1;}
+  .member-info h4{margin:0 0 2px;font-size:15px;font-weight:700;color:var(--blue-900);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .member-role{
+    font-size:11px;font-weight:600;color:var(--blue-700);background:var(--blue-100);
+    padding:1px 8px;border-radius:999px;
+  }
+  .member-info p{margin:0;font-size:13px;color:var(--muted);word-break:break-word;}
+  .member-actions{display:flex;gap:2px;flex:none;}
+
+  .article-card{
+    position:relative;background:#fff;border-radius:20px;padding:22px 24px;margin-bottom:16px;
+    border:1px solid rgba(59,130,214,.12);box-shadow:0 10px 26px rgba(59,130,214,.08);
+    transition:box-shadow .22s;
+  }
+  .article-card:hover{box-shadow:0 16px 34px rgba(59,130,214,.14);}
+  .article-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px;}
+  .article-head h3{margin:0;font-size:18px;font-weight:800;color:var(--blue-900);line-height:1.4;padding-right:56px;}
+  .article-meta{font-size:12.5px;color:var(--muted);margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;}
+  .article-body{
+    margin:0;font-size:15px;color:#3D5A78;white-space:pre-wrap;word-break:break-word;
+    cursor:pointer;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .article-body.expanded{display:block;-webkit-line-clamp:unset;overflow:visible;}
+  .article-more{margin-top:8px;font-size:13px;color:var(--blue-500);font-weight:600;cursor:pointer;user-select:none;}
+
+  .about-card{
+    background:linear-gradient(160deg,#FFFFFF 0%,#F2F8FF 100%);
+    border:1px solid rgba(59,130,214,.14);border-radius:26px;
+    padding:clamp(30px,6vw,44px) clamp(22px,5vw,36px);text-align:center;
+    box-shadow:0 14px 36px rgba(59,130,214,.09);
+  }
+  .about-icon{
+    width:66px;height:66px;margin:0 auto 18px;border-radius:20px;
+    background:linear-gradient(135deg,#E4F0FF,#FFF3E3);display:grid;place-items:center;font-size:30px;
+  }
+  .about-card h2{margin:0 0 14px;font-size:21px;color:var(--blue-900);font-weight:800;}
+  .about-card p{margin:0 0 6px;color:#4E6A88;font-size:15px;}
+  .about-note{margin-top:20px !important;color:var(--blue-700) !important;font-weight:600;font-size:14px !important;}
+
+  .footer{text-align:center;padding:38px 20px 56px;color:var(--muted);font-size:13px;}
+  .footer p{margin:0 0 4px;}
+  .footer-small{opacity:.72;font-size:12.5px;}
+
+  .modal{
+    position:fixed;inset:0;z-index:100;background:rgba(18,58,99,.34);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    display:grid;place-items:center;padding:20px;
+    opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;
+  }
+  .modal.open{opacity:1;visibility:visible;}
+  .modal-card{
+    width:100%;max-width:440px;background:#fff;border-radius:24px;padding:26px 24px;
+    box-shadow:0 24px 60px rgba(18,58,99,.28);
+    transform:translateY(16px) scale(.97);
+    transition:transform .3s cubic-bezier(.2,.9,.3,1.2);
+    max-height:calc(100vh - 40px);overflow-y:auto;
+  }
+  .modal.open .modal-card{transform:none;}
+  .modal-card h2{margin:0 0 20px;font-size:19px;color:var(--blue-900);font-weight:800;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--blue-700);margin-bottom:6px;}
+  .field input,.field textarea,.field select{
+    width:100%;font-family:inherit;font-size:15px;color:var(--text);
+    padding:12px 14px;border-radius:14px;border:1.5px solid #DCE9F8;background:#F9FCFF;
+    outline:none;transition:border-color .2s,box-shadow .2s,background .2s;
+    -webkit-appearance:none;appearance:none;
+  }
+  .field select{
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B87A6' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;background-size:18px;
+    padding-right:40px;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{
+    border-color:#6FA8E6;background:#fff;box-shadow:0 0 0 4px rgba(74,144,226,.14);
+  }
+  .field textarea{resize:vertical;min-height:110px;line-height:1.6;}
+  .modal-actions{display:flex;gap:10px;margin-top:22px;}
+  .modal-actions .btn{flex:1;padding:13px 16px;}
+
+  /* 认证弹窗 */
+  .auth-modal{
+    position:fixed;inset:0;z-index:150;background:rgba(18,58,99,.40);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    display:grid;place-items:center;padding:20px;
+    opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;
+  }
+  .auth-modal.open{opacity:1;visibility:visible;}
+  .auth-card{
+    width:100%;max-width:400px;background:#fff;border-radius:26px;padding:30px 26px;
+    box-shadow:0 24px 60px rgba(18,58,99,.30);
+    transform:translateY(20px) scale(.96);
+    transition:transform .35s cubic-bezier(.2,.9,.3,1.15);
+    max-height:calc(100vh - 40px);overflow-y:auto;
+  }
+  .auth-modal.open .auth-card{transform:none;}
+  .auth-logo{
+    width:64px;height:64px;margin:0 auto 14px;border-radius:20px;
+    background:linear-gradient(135deg,#4A90E2,#8FBEF0);
+    display:grid;place-items:center;color:#fff;font-weight:800;font-size:22px;
+    box-shadow:0 10px 24px rgba(59,130,214,.30);
+  }
+  .auth-card h2{margin:0 0 6px;font-size:21px;text-align:center;color:var(--blue-900);font-weight:800;}
+  .auth-card .auth-sub{margin:0 0 22px;text-align:center;color:var(--muted);font-size:13.5px;}
+  .auth-tabs{display:flex;gap:6px;background:#F0F6FF;padding:4px;border-radius:999px;margin-bottom:22px;}
+  .auth-tab{
+    flex:1;padding:9px;border:none;border-radius:999px;background:transparent;
+    font-family:inherit;font-size:14px;font-weight:700;color:var(--muted);
+    cursor:pointer;transition:background .2s,color .2s;
+  }
+  .auth-tab.active{background:#fff;color:var(--blue-700);box-shadow:0 4px 12px rgba(59,130,214,.14);}
+  .auth-error{
+    margin-top:12px;padding:10px 14px;border-radius:12px;
+    background:#FFEDE8;color:#C0392B;font-size:13px;font-weight:600;
+    display:none;line-height:1.5;
+  }
+  .auth-error.show{display:block;}
+  .auth-close{
+    position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:50%;
+    border:none;background:rgba(255,255,255,.9);color:var(--blue-700);font-size:16px;
+    cursor:pointer;display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.08);
+  }
+  .auth-card{position:relative;}
+  .auth-footer{
+    margin-top:20px;padding-top:16px;border-top:1px solid #EEF4FC;
+    text-align:center;font-size:12.5px;color:var(--muted);line-height:1.6;
+  }
+
+  .lightbox{
+    position:fixed;inset:0;z-index:200;background:rgba(10,30,55,.92);
+    display:grid;place-items:center;padding:24px;
+    opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;
+  }
+  .lightbox.open{opacity:1;visibility:visible;}
+  .lightbox img{max-width:100%;max-height:88vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+  .lightbox-close{
+    position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;
+    border:none;background:rgba(255,255,255,.16);color:#fff;font-size:18px;cursor:pointer;
+    display:grid;place-items:center;
+  }
+
+  .toast{
+    position:fixed;left:50%;bottom:38px;transform:translateX(-50%) translateY(20px);
+    z-index:300;padding:12px 24px;border-radius:999px;
+    background:rgba(18,58,99,.92);color:#fff;font-size:14px;font-weight:600;
+    opacity:0;visibility:hidden;transition:opacity .25s,transform .25s,visibility .25s;
+    max-width:calc(100vw - 48px);text-align:center;
+  }
+  .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:640px){
+    .brand-text{display:none;}
+    .nav-inner{padding:10px 14px 8px;gap:8px;}
+    .online-pill{font-size:11.5px;padding:4px 10px;}
+    .user-chip{max-width:110px;font-size:11.5px;}
+    .section{padding:18px 16px 40px;}
+    .photo-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr));}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="cloud-status local" id="cloudStatus">
+  <span id="cloudStatusText">⏳ 正在检查云端配置…</span>
+</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#" data-tab="home">
+      <span class="brand-badge">26Q19</span>
+      <span class="brand-text">班级空间</span>
+    </a>
+    <div class="nav-right">
+      <span class="online-pill" id="onlinePill" title="当前在线人数">
+        <span class="online-dot"></span>
+        <span id="onlineCount">--</span> 人在线
+      </span>
+      <button class="login-btn" id="loginBtn" type="button">登录 / 注册</button>
+      <button class="user-chip" id="userChip" type="button" style="display:none;">
+        <span class="avatar" id="userAvatar">?</span>
+        <span class="name" id="userName">用户</span>
+      </button>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="home">🏠 首页</button>
+    <button class="tab" data-tab="photos">📷 照片墙</button>
+    <button class="tab" data-tab="game">🎮 消消乐</button>
+    <button class="tab" data-tab="members">👥 班级成员</button>
+    <button class="tab" data-tab="articles">✍️ 文章</button>
+    <button class="tab" data-tab="news">📰 班级新闻</button>
+  </nav>
+</header>
+
+<main>
+  <section class="panel active" id="panel-home">
+    <div class="hero">
+      <p class="hero-eyebrow">✨ 欢迎回家</p>
+      <h1>这里是 <span class="grad">26Q19</span></h1>
+      <p class="hero-sub">记录我们一起走过的日子<br>每一次欢笑，每一段时光，都值得被留下。</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="openAdd" type="button">＋ 写下第一条记录</button>
+        <button class="btn btn-ghost" data-tab="photos" type="button">📷 看看照片墙</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>活动记录</h2>
+        <span class="count" id="count">0 条</span>
+      </div>
+      <div class="records" id="recordsList"></div>
+      <div class="empty" id="emptyState">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#4A90E2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18"/><path d="M8 3v3M16 3v3"/>
+            <circle cx="9" cy="14" r="1.4"/><path d="M12.5 17.2l2.6-3 2.4 2.6"/>
+          </svg>
+        </div>
+        <h3>还没有活动记录</h3>
+        <p>这里还是一片空白，第一段回忆等你来写 ✨</p>
+        <button class="btn btn-primary" id="openAdd2" type="button">＋ 写下第一条记录</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="about-card">
+        <div class="about-icon">🏫</div>
+        <h2>关于 26Q19</h2>
+        <p>这是我们班的小小角落。</p>
+        <p>照片、文章、新闻、还有我们一起玩的小游戏——</p>
+        <p>都安放在这里。</p>
+        <p class="about-note">第一段回忆，由你来写下 ✨</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-photos">
+    <div class="section">
+      <div class="section-head">
+        <h2>📷 照片墙</h2>
+        <span class="count" id="photoCount">0 张</span>
+      </div>
+      <div class="photo-toolbar">
+        <button class="btn btn-primary btn-sm" id="uploadBtn" type="button">＋ 上传照片</button>
+        <input type="file" id="photoInput" accept="image/*" multiple hidden>
+      </div>
+      <div class="photo-grid" id="photoGrid"></div>
+      <div class="empty" id="photoEmpty">
+        <div class="empty-icon" style="font-size:30px;">🖼️</div>
+        <h3>照片墙还空着</h3>
+        <p>上传第一张照片，留下今天的笑容 📸</p>
+        <button class="btn btn-primary" id="uploadBtn2" type="button">＋ 上传照片</button>
+      </div>
+      <p class="photo-note" id="photoNote">💡 照片保存在本机浏览器中，换设备或清除数据后会丢失。</p>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-game">
+    <div class="section">
+      <div class="section-head"><h2>🎮 消消乐</h2></div>
+      <div class="game-wrap">
+        <div class="game-header">
+          <div class="score-box">
+            <span class="score-label">得分</span>
+            <span class="score-value" id="gameScore">0</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="newGameBtn" type="button">🔄 重新开始</button>
+        </div>
+        <div class="game-board" id="gameBoard"></div>
+        <p class="game-hint">点击两个相邻方块交换位置，三个或以上相同即可消除 ✨</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-members">
+    <div class="section">
+      <div class="section-head">
+        <h2>👥 班级成员</h2>
+        <button class="btn btn-primary btn-sm" id="addMemberBtn" type="button">＋ 添加成员</button>
+      </div>
+      <div id="membersArea">
+        <div class="group-title"><span class="bar"></span>教师</div>
+        <div class="member-list" id="teacherList"></div>
+        <div class="group-title"><span class="bar"></span>同学</div>
+        <div class="member-list" id="studentList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-articles">
+    <div class="section">
+      <div class="section-head">
+        <h2>✍️ 文章</h2>
+        <button class="btn btn-primary btn-sm" id="addArticleBtn" type="button">＋ 写文章</button>
+      </div>
+      <div id="articlesList"></div>
+      <div class="empty" id="articlesEmpty">
+        <div class="empty-icon" style="font-size:30px;">📝</div>
+        <h3>还没有文章</h3>
+        <p>写下你的第一篇随笔、感想或故事吧</p>
+        <button class="btn btn-primary" id="addArticleBtn2" type="button">＋ 写文章</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-news">
+    <div class="section">
+      <div class="section-head">
+        <h2>📰 班级新闻</h2>
+        <button class="btn btn-primary btn-sm" id="addNewsBtn" type="button">＋ 发布新闻</button>
+      </div>
+      <div id="newsList"></div>
+      <div class="empty" id="newsEmpty">
+        <div class="empty-icon" style="font-size:30px;">📣</div>
+        <h3>还没有新闻</h3>
+        <p>发布第一条班级快讯，让大家知道最新消息</p>
+        <button class="btn btn-primary" id="addNewsBtn2" type="button">＋ 发布新闻</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>26Q19 · 我们的班级空间</p>
+  <p class="footer-small">愿每一次相聚，都被温柔记住。</p>
+</footer>
+
+<!-- 通用表单弹窗 -->
+<div class="modal" id="formModal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2 id="formTitle">编辑</h2>
+    <form id="formEl"></form>
+  </div>
+</div>
+
+<!-- 登录/注册弹窗 -->
+<div class="auth-modal" id="authModal" role="dialog" aria-modal="true">
+  <div class="auth-card">
+    <button class="auth-close" id="authClose" type="button">✕</button>
+    <div class="auth-logo">26</div>
+    <h2 id="authTitle">欢迎回来</h2>
+    <p class="auth-sub" id="authSub">登录后即可添加记录、上传照片</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-auth="login" type="button">登录</button>
+      <button class="auth-tab" data-auth="register" type="button">注册</button>
+    </div>
+
+    <form id="authForm">
+      <div class="field" id="nameField" style="display:none;">
+        <label for="authName">昵称</label>
+        <input id="authName" type="text" placeholder="例如：李小明" maxlength="20" autocomplete="nickname">
+      </div>
+      <div class="field">
+        <label for="authEmail">邮箱</label>
+        <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="authPwd">密码</label>
+        <input id="authPwd" type="password" placeholder="至少 6 位" autocomplete="current-password" required>
+      </div>
+      <div class="auth-error" id="authError"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" type="submit" id="authSubmit">登录</button>
+      </div>
+    </form>
+
+    <div class="auth-footer" id="authFooter">
+      没有账号？点上方「注册」创建一个吧 ✨
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" type="button">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase 配置 -->
+<script id="firebase-config" type="application/json">
+{
+  "apiKey": "AIzaSyBlADnDFlxAcLhRuae4L8f0W9HC0jq52cg",
+  "authDomain": "q19-53380.firebaseapp.com",
+  "projectId": "q19-53380",
+  "storageBucket": "q19-53380.firebasestorage.app",
+  "messagingSenderId": "421356906053",
+  "appId": "1:421356906053:web:1aae159fd8055d5646652c"
+}
+</script>
+
+<script type="module">
+/* ============ 0. 基础工具 ============ */
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function fmtDate(v){
+  if (!v) return '';
+  const p = String(v).split('-');
+  if (p.length !== 3) return v;
+  return p[0] + '年' + parseInt(p[1],10) + '月' + parseInt(p[2],10) + '日';
+}
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+}
+
+/* ============ 1. Firebase 配置 ============ */
+const cfgEl = document.getElementById('firebase-config');
+let firebaseConfig = {};
+try { firebaseConfig = JSON.parse(cfgEl.textContent); } catch(e){}
+const CONFIGURED = firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('在这里');
+
+let fb = null;
+if (CONFIGURED) {
+  try {
+    const [{ initializeApp }, authMod, fs, st] = await Promise.all([
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'),
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js'),
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'),
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js')
+    ]);
+    const app = initializeApp(firebaseConfig);
+    fb = {
+      auth: authMod.getAuth(app),
+      db: fs.getFirestore(app),
+      storage: st.getStorage(app),
+      authMod, fs, st
+    };
+  } catch(e) {
+    console.error('Firebase 初始化失败', e);
+    fb = null;
+  }
+}
+
+/* ============ 2. 认证状态 ============ */
+const authState = {
+  user: null,        // { uid, email, displayName }
+  ready: false,
+  listeners: []
+};
+function onAuth(fn){ authState.listeners.push(fn); if (authState.ready) fn(authState.user); }
+function emitAuth(){ authState.listeners.forEach(fn => fn(authState.user)); }
+
+// 本地模式下的虚拟认证（用 localStorage 模拟）
+const LOCAL_USER_KEY = '26q19_local_user';
+if (!fb) {
+  const saved = localStorage.getItem(LOCAL_USER_KEY);
+  if (saved) {
+    try { authState.user = JSON.parse(saved); } catch(e){}
+  }
+  authState.ready = true;
+} else {
+  fb.authMod.onAuthStateChanged(fb.auth, user => {
+    if (user) {
+      authState.user = {
+        uid: user.uid,
+        email: user.email || '',
+        displayName: user.displayName || (user.email ? user.email.split('@')[0] : '同学')
+      };
+    } else {
+      authState.user = null;
+    }
+    authState.ready = true;
+    emitAuth();
+  });
+}
+
+/* ============ 3. 认证 UI ============ */
+const authModal = document.getElementById('authModal');
+const authTitle = document.getElementById('authTitle');
+const authSub = document.getElementById('authSub');
+const authForm = document.getElementById('authForm');
+const authEmail = document.getElementById('authEmail');
+const authPwd = document.getElementById('authPwd');
+const authName = document.getElementById('authName');
+const authNameField = document.getElementById('nameField');
+const authError = document.getElementById('authError');
+const authSubmit = document.getElementById('authSubmit');
+const authFooter = document.getElementById('authFooter');
+const loginBtn = document.getElementById('loginBtn');
+const userChip = document.getElementById('userChip');
+const userAvatar = document.getElementById('userAvatar');
+const userName = document.getElementById('userName');
+
+let authMode = 'login';
+
+function setAuthMode(mode){
+  authMode = mode;
+  document.querySelectorAll('.auth-tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-auth') === mode);
+  });
+  if (mode === 'login') {
+    authTitle.textContent = '欢迎回来';
+    authSub.textContent = '登录后即可添加记录、上传照片';
+    authNameField.style.display = 'none';
+    authSubmit.textContent = '登录';
+    authFooter.textContent = '没有账号？点上方「注册」创建一个吧 ✨';
+    authPwd.setAttribute('autocomplete', 'current-password');
+  } else {
+    authTitle.textContent = '加入 26Q19';
+    authSub.textContent = '注册一个账号，和大家一起记录';
+    authNameField.style.display = 'block';
+    authSubmit.textContent = '注册';
+    authFooter.textContent = '已有账号？点上方「登录」直接进入';
+    authPwd.setAttribute('autocomplete', 'new-password');
+  }
+  authError.classList.remove('show');
+}
+
+function openAuth(mode){
+  setAuthMode(mode || 'login');
+  authModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    if (authMode === 'register') authName.focus();
+    else authEmail.focus();
+  }, 220);
+}
+function closeAuth(){
+  authModal.classList.remove('open');
+  document.body.style.overflow = '';
+  authForm.reset();
+  authError.classList.remove('show');
+}
+
+document.querySelectorAll('.auth-tab').forEach(t => {
+  t.onclick = () => setAuthMode(t.getAttribute('data-auth'));
+});
+document.getElementById('authClose').onclick = closeAuth;
+authModal.addEventListener('click', e => { if (e.target === authModal) closeAuth(); });
+
+loginBtn.onclick = () => openAuth('login');
+
+// 用户菜单
+userChip.onclick = () => {
+  if (!authState.user) return;
+  const u = authState.user;
+  const choice = prompt(
+    '当前登录：' + (u.displayName || u.email) + '\n\n输入 1 退出登录\n输入 2 修改昵称\n输入其它内容取消',
+    ''
+  );
+  if (choice === '1') logout();
+  else if (choice === '2') {
+    const newName = prompt('输入新昵称', u.displayName || '');
+    if (newName && newName.trim()) {
+      updateDisplayName(newName.trim());
+    }
+  }
+};
+
+async function logout(){
+  if (!confirm('确定退出登录吗？')) return;
+  if (fb) {
+    try { await fb.authMod.signOut(fb.auth); } catch(e){}
+  } else {
+    localStorage.removeItem(LOCAL_USER_KEY);
+    authState.user = null;
+    emitAuth();
+  }
+  showToast('已退出登录');
+}
+
+async function updateDisplayName(name){
+  if (fb && fb.auth.currentUser) {
+    try {
+      await fb.authMod.updateProfile(fb.auth.currentUser, { displayName: name });
+      authState.user.displayName = name;
+      emitAuth();
+      showToast('昵称已更新为「' + name + '」');
+    } catch(e){ showToast('更新失败'); }
+  } else if (authState.user) {
+    authState.user.displayName = name;
+    localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(authState.user));
+    emitAuth();
+    showToast('昵称已更新为「' + name + '」');
+  }
+}
+
+// 表单提交
+authForm.onsubmit = async e => {
+  e.preventDefault();
+  authError.classList.remove('show');
+  const email = authEmail.value.trim();
+  const pwd = authPwd.value;
+  const name = authName.value.trim();
+
+  if (!email) { showAuthError('请填写邮箱'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAuthError('邮箱格式不正确'); return; }
+  if (!pwd || pwd.length < 6) { showAuthError('密码至少 6 位'); return; }
+  if (authMode === 'register' && !name) { showAuthError('请填写昵称'); return; }
+
+  authSubmit.disabled = true;
+  authSubmit.textContent = authMode === 'login' ? '登录中…' : '注册中…';
+
+  try {
+    if (fb) {
+      if (authMode === 'register') {
+        const cred = await fb.authMod.createUserWithEmailAndPassword(fb.auth, email, pwd);
+        await fb.authMod.updateProfile(cred.user, { displayName: name });
+        authState.user = { uid: cred.user.uid, email, displayName: name };
+        emitAuth();
+        showToast('注册成功，欢迎加入 26Q19 🎉');
+      } else {
+        const cred = await fb.authMod.signInWithEmailAndPassword(fb.auth, email, pwd);
+        authState.user = {
+          uid: cred.user.uid,
+          email,
+          displayName: cred.user.displayName || email.split('@')[0]
+        };
+        emitAuth();
+        showToast('登录成功，欢迎回来 👋');
+      }
+    } else {
+      // 本地模拟
+      const fakeUid = 'local_' + btoa(email).replace(/[^a-z0-9]/gi,'').slice(0,12);
+      authState.user = {
+        uid: fakeUid,
+        email,
+        displayName: authMode === 'register' ? name : (email.split('@')[0])
+      };
+      localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(authState.user));
+      emitAuth();
+      showToast(authMode === 'register' ? '注册成功（本地模式）' : '登录成功（本地模式）');
+    }
+    closeAuth();
+  } catch(err) {
+    console.error(err);
+    let msg = '操作失败，请重试';
+    const code = err && err.code ? String(err.code) : '';
+    if (code.includes('email-already-in-use')) msg = '该邮箱已被注册';
+    else if (code.includes('invalid-email')) msg = '邮箱格式不正确';
+    else if (code.includes('weak-password')) msg = '密码太弱，至少 6 位';
+    else if (code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential')) msg = '邮箱或密码错误';
+    else if (code.includes('too-many-requests')) msg = '尝试次数过多，请稍后再试';
+    else if (code.includes('network')) msg = '网络异常，请检查网络后重试';
+    else if (err && err.message) msg = err.message;
+    showAuthError(msg);
+  } finally {
+    authSubmit.disabled = false;
+    authSubmit.textContent = authMode === 'login' ? '登录' : '注册';
+  }
+};
+function showAuthError(msg){
+  authError.textContent = '⚠️ ' + msg;
+  authError.classList.add('show');
+}
+
+// 认证状态变化时更新 UI
+onAuth(user => {
+  if (user) {
+    loginBtn.style.display = 'none';
+    userChip.style.display = 'inline-flex';
+    const display = user.displayName || user.email || '同学';
+    userName.textContent = display;
+    userAvatar.textContent = display.slice(0, 1).toUpperCase();
+    userChip.title = '已登录：' + display + '（点击管理）';
+  } else {
+    loginBtn.style.display = 'inline-flex';
+    userChip.style.display = 'none';
+  }
+});
+
+/* ============ 4. 在线人数（心跳） ============ */
+const presence = {
+  timer: null,
+  pollTimer: null,
+  docRef: null,
+  async start() {
+    if (!fb || !authState.user) return;
+    const { fs, db } = fb;
+    const uid = authState.user.uid;
+    this.docRef = fs.doc(db, 'presence', uid);
+
+    const beat = async () => {
+      if (!authState.user) return;
+      try {
+        await fs.setDoc(this.docRef, {
+          name: authState.user.displayName || authState.user.email || '同学',
+          lastSeen: Date.now()
+        });
+      } catch(e) { /* 静默 */ }
+    };
+    await beat();
+    this.timer = setInterval(beat, 25000);
+
+    // 页面可见性变化时立即上报
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') beat();
+    });
+
+    // 轮询在线人数
+    const poll = async () => {
+      try {
+        const cutoff = Date.now() - 70000; // 70 秒内算在线
+        const q = fs.query(
+          fs.collection(db, 'presence'),
+          fs.where('lastSeen', '>', cutoff)
+        );
+        const snap = await fs.getDocs(q);
+        updateOnlineCount(snap.size);
+      } catch(e) {
+        updateOnlineCount(null);
+      }
+    };
+    await poll();
+    this.pollTimer = setInterval(poll, 20000);
+
+    // 登出时清理
+    window.addEventListener('beforeunload', () => {
+      if (this.docRef) fs.deleteDoc(this.docRef).catch(()=>{});
+    });
+  },
+  stop() {
+    if (this.timer) { clearInterval(this.timer); this.timer = null; }
+    if (this.pollTimer) { clearInterval(this.pollTimer); this.pollTimer = null; }
+    if (this.docRef && fb) {
+      fb.fs.deleteDoc(this.docRef).catch(()=>{});
+      this.docRef = null;
+    }
+  }
+};
+
+const onlineCountEl = document.getElementById('onlineCount');
+const onlinePill = document.getElementById('onlinePill');
+function updateOnlineCount(n){
+  if (n == null) {
+    onlineCountEl.textContent = '--';
+    onlinePill.style.background = '#F3F4F6';
+    onlinePill.style.color = '#6B7280';
+    onlinePill.style.borderColor = '#E5E7EB';
+    return;
+  }
+  onlineCountEl.textContent = n;
+  if (n > 0) {
+    onlinePill.style.background = '#E7F6EC';
+    onlinePill.style.color = '#1E7A44';
+    onlinePill.style.borderColor = '#BFE8CD';
+  }
+}
+
+// 认证状态变化时启停心跳
+onAuth(user => {
+  if (fb) {
+    if (user) presence.start();
+    else { presence.stop(); updateOnlineCount(null); }
+  } else {
+    // 本地模式：只显示自己
+    updateOnlineCount(user ? 1 : 1);
+  }
+});
+
+/* ============ 5. 数据层 ============ */
+const LOCAL_KEYS = {
+  records:'26q19_records_v1', photos:'26q19_photos_v1',
+  members:'26q19_members_v1', articles:'26q19_articles_v1', news:'26q19_news_v1'
+};
+const COLLECTIONS = ['records','photos','members','articles','news'];
+
+const localStore = {
+  get(k, d){ try{ const r=localStorage.getItem(k); return r?JSON.parse(r):d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+};
+
+const data = {
+  isCloud: !!fb,
+  subscribe(name, cb){
+    if (fb) {
+      const { fs, db } = fb;
+      const q = fs.query(fs.collection(db, name), fs.orderBy('ts', 'desc'));
+      return fs.onSnapshot(q, snap => {
+        const arr = snap.docs.map(d => Object.assign({id:d.id}, d.data()));
+        cb(arr);
+      }, err => {
+        console.error('订阅失败', name, err);
+      });
+    } else {
+      cb(localStore.get(LOCAL_KEYS[name], []));
+      return () => {};
+    }
+  },
+  async add(name, obj){
+    requireAuth();
+    // 自动附加作者信息
+    if (authState.user && !obj.authorUid) {
+      obj.authorUid = authState.user.uid;
+      obj.authorName = authState.user.displayName || authState.user.email || '同学';
+    }
+    if (fb) {
+      const { fs, db } = fb;
+      await fs.addDoc(fs.collection(db, name), obj);
+    } else {
+      const arr = localStore.get(LOCAL_KEYS[name], []);
+      arr.unshift(Object.assign({id:uid()}, obj));
+      localStore.set(LOCAL_KEYS[name], arr);
+      this._emit(name, arr);
+    }
+  },
+  async update(name, id, obj){
+    requireAuth();
+    if (fb) {
+      const { fs, db } = fb;
+      await fs.updateDoc(fs.doc(db, name, id), obj);
+    } else {
+      const arr = localStore.get(LOCAL_KEYS[name], []);
+      const it = arr.find(x => x.id === id);
+      if (it) Object.assign(it, obj);
+      localStore.set(LOCAL_KEYS[name], arr);
+      this._emit(name, arr);
+    }
+  },
+  async remove(name, id){
+    requireAuth();
+    if (fb) {
+      const { fs, db } = fb;
+      await fs.deleteDoc(fs.doc(db, name, id));
+    } else {
+      let arr = localStore.get(LOCAL_KEYS[name], []);
+      arr = arr.filter(x => x.id !== id);
+      localStore.set(LOCAL_KEYS[name], arr);
+      this._emit(name, arr);
+    }
+  },
+  _subs: {},
+  _emit(name, arr){ (this._subs[name] || []).forEach(fn => fn(arr)); },
+  on(name, fn){ (this._subs[name] = this._subs[name] || []).push(fn); },
+  async uploadPhoto(file){
+    requireAuth();
+    const dataUrl = await compressImage(file);
+    if (fb) {
+      const { st, storage } = fb;
+      const path = 'photos/' + uid() + '.jpg';
+      const blob = await (await fetch(dataUrl)).blob();
+      const ref = st.ref(storage, path);
+      await st.uploadBytes(ref, blob);
+      const url = await st.getDownloadURL(ref);
+      return { url, path };
+    }
+    return { data: dataUrl, path: null };
+  },
+  async deletePhoto(item){
+    if (fb && item.path) {
+      try {
+        const { st, storage } = fb;
+        await st.deleteObject(st.ref(storage, item.path));
+      } catch(e){}
+    }
+  }
+};
+
+// 需要登录才能操作的统一检查
+function requireAuth(){
+  if (!authState.user) {
+    const err = new Error('请先登录');
+    err.code = 'auth/required';
+    showToast('请先登录后再操作 🔐');
+    openAuth('login');
+    throw err;
+  }
+}
+
+if (!data.isCloud) {
+  COLLECTIONS.forEach(name => {
+    data.on(name, arr => { if (renderers[name]) renderers[name](arr); });
+  });
+}
+
+/* ============ 6. 表单弹窗 ============ */
+const formModal = document.getElementById('formModal');
+const formTitleEl = document.getElementById('formTitle');
+const formEl = document.getElementById('formEl');
+
+function showForm(opts){
+  // 所有表单都要求登录
+  if (!authState.user) {
+    showToast('请先登录后再操作 🔐');
+    openAuth('login');
+    return;
+  }
+  formTitleEl.textContent = opts.title;
+  let html = '';
+  opts.fields.forEach(f => {
+    const val = (opts.values && opts.values[f.key] != null) ? opts.values[f.key] : (f.default || '');
+    html += '<div class="field"><label>' + esc(f.label) + '</label>';
+    if (f.type === 'textarea') {
+      html += '<textarea name="'+f.key+'" placeholder="'+esc(f.placeholder||'')+'">'+esc(val)+'</textarea>';
+    } else if (f.type === 'select') {
+      html += '<select name="'+f.key+'">';
+      f.options.forEach(o => {
+        html += '<option value="'+esc(o.value)+'"'+(String(o.value)===String(val)?' selected':'')+'>'+esc(o.label)+'</option>';
+      });
+      html += '</select>';
+    } else {
+      html += '<input type="'+f.type+'" name="'+f.key+'" value="'+esc(val)+'" placeholder="'+esc(f.placeholder||'')+'">';
+    }
+    html += '</div>';
+  });
+  html += '<div class="modal-actions">'
+       +  '<button type="button" class="btn btn-ghost" id="formCancel">取消</button>'
+       +  '<button type="submit" class="btn btn-primary">'+esc(opts.submitText||'保存')+'</button>'
+       +  '</div>';
+  formEl.innerHTML = html;
+
+  const close = () => {
+    formModal.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+  formEl.querySelector('#formCancel').onclick = close;
+
+  formEl.onsubmit = async e => {
+    e.preventDefault();
+    const fd = new FormData(formEl);
+    const d = {};
+    opts.fields.forEach(f => { d[f.key] = String(fd.get(f.key) || '').trim(); });
+    for (const f of opts.fields) {
+      if (f.required && !d[f.key]) {
+        formEl.querySelector('[name="'+f.key+'"]').focus();
+        showToast('请填写「'+f.label+'」');
+        return;
+      }
+    }
+    const submitBtn = formEl.querySelector('button[type=submit]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '保存中…';
+    try {
+      await opts.onSubmit(d);
+      close();
+    } catch(err) {
+      console.error(err);
+      if (err && err.code === 'auth/required') {
+        // 已由 requireAuth 处理
+      } else {
+        showToast('保存失败：' + (err.message || '请重试'));
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = opts.submitText || '保存';
+    }
+  };
+
+  formModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => { const f = formEl.querySelector('input,textarea,select'); if(f) f.focus(); }, 200);
+}
+formModal.addEventListener('click', e => {
+  if (e.target === formModal) {
+    formModal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+/* ============ 7. 标签页 ============ */
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.panel');
+function switchTab(name){
+  tabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-tab') === name));
+  panels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  window.scrollTo({top:0, behavior:'smooth'});
+  if (name === 'game' && !gameInited) initGame();
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-tab]');
+  if (el && el.tagName !== 'INPUT') {
+    e.preventDefault();
+    switchTab(el.getAttribute('data-tab'));
+  }
+});
+
+/* ============ 8. 渲染函数集 ============ */
+const renderers = {};
+
+/* ----- 活动记录 ----- */
+const recordsListEl = document.getElementById('recordsList');
+const recordsEmptyEl = document.getElementById('emptyState');
+const countEl = document.getElementById('count');
+renderers.records = arr => {
+  countEl.textContent = arr.length + ' 条';
+  if (!arr.length) {
+    recordsListEl.innerHTML = '';
+    recordsListEl.style.display = 'none';
+    recordsEmptyEl.style.display = 'block';
+    return;
+  }
+  recordsListEl.style.display = 'grid';
+  recordsEmptyEl.style.display = 'none';
+  recordsListEl.innerHTML = arr.map(r =>
+    '<article class="record">'
+    + '<div class="card-actions">'
+    +   '<button class="icon-btn" data-edit-record="'+r.id+'" title="编辑">✎</button>'
+    +   '<button class="icon-btn danger" data-del-record="'+r.id+'" title="删除">✕</button>'
+    + '</div>'
+    + (r.date ? '<span class="record-date">📅 '+esc(fmtDate(r.date))+'</span>' : '')
+    + '<h3>'+esc(r.title)+'</h3>'
+    + (r.desc ? '<p>'+esc(r.desc)+'</p>' : '')
+    + (r.authorName ? '<div class="record-author">👤 '+esc(r.authorName)+'</div>' : '')
+    + '</article>'
+  ).join('');
+};
+
+function openRecordForm(existing){
+  showForm({
+    title: existing ? '编辑活动记录' : '添加活动记录',
+    submitText: existing ? '保存修改' : '保存记录',
+    fields: [
+      {key:'title', label:'活动名称', type:'text', placeholder:'例如：秋季运动会', required:true},
+      {key:'date', label:'日期', type:'date', default: todayStr()},
+      {key:'desc', label:'简单描述（可不填）', type:'textarea', placeholder:'那天发生了什么有趣的事？'}
+    ],
+    values: existing || {},
+    onSubmit: async d => {
+      if (existing) {
+        await data.update('records', existing.id, {title:d.title, date:d.date, desc:d.desc});
+      } else {
+        await data.add('records', {title:d.title, date:d.date, desc:d.desc, ts:Date.now()});
+      }
+      showToast(existing ? '已更新' : '记录已保存 ✨');
+    }
+  });
+}
+document.getElementById('openAdd').onclick = () => openRecordForm(null);
+document.getElementById('openAdd2').onclick = () => openRecordForm(null);
+
+recordsListEl.addEventListener('click', async e => {
+  const ed = e.target.closest('[data-edit-record]');
+  const dl = e.target.closest('[data-del-record]');
+  if (ed) {
+    const r = currentData.records.find(x => x.id === ed.getAttribute('data-edit-record'));
+    if (r) openRecordForm(r);
+  }
+  if (dl) {
+    if (!confirm('确定删除这条记录吗？')) return;
+    try {
+      await data.remove('records', dl.getAttribute('data-del-record'));
+      showToast('已删除');
+    } catch(err){}
+  }
+});
+
+/* ----- 照片墙 ----- */
+const photoGridEl = document.getElementById('photoGrid');
+const photoEmptyEl = document.getElementById('photoEmpty');
+const photoCountEl = document.getElementById('photoCount');
+const photoInput = document.getElementById('photoInput');
+
+renderers.photos = arr => {
+  photoCountEl.textContent = arr.length + ' 张';
+  if (!arr.length) {
+    photoGridEl.innerHTML = '';
+    photoGridEl.style.display = 'none';
+    photoEmptyEl.style.display = 'block';
+    return;
+  }
+  photoGridEl.style.display = 'grid';
+  photoEmptyEl.style.display = 'none';
+  photoGridEl.innerHTML = arr.map((p, i) => {
+    const src = p.url || p.data;
+    return '<div class="photo-item" data-idx="'+i+'">'
+      + '<img src="'+src+'" alt="班级照片" loading="lazy">'
+      + '<button class="photo-del" data-del-photo="'+p.id+'" title="删除">✕</button>'
+      + '</div>';
+  }).join('');
+};
+
+function triggerUpload(){
+  if (!authState.user) {
+    showToast('请先登录后再上传 🔐');
+    openAuth('login');
+    return;
+  }
+  photoInput.click();
+}
+document.getElementById('uploadBtn').onclick = triggerUpload;
+document.getElementById('uploadBtn2').onclick = triggerUpload;
+
+photoInput.addEventListener('change', async () => {
+  const files = Array.from(photoInput.files || []);
+  if (!files.length) return;
+  photoInput.value = '';
+  showToast('正在上传 ' + files.length + ' 张照片…');
+
+  let ok = 0, fail = 0;
+  for (const f of files) {
+    if (!/^image\//.test(f.type)) { fail++; continue; }
+    try {
+      const result = await data.uploadPhoto(f);
+      await data.add('photos', {
+        url: result.url || null,
+        data: result.data || null,
+        path: result.path,
+        ts: Date.now()
+      });
+      ok++;
+    } catch(err) {
+      console.error(err);
+      fail++;
+    }
+  }
+  showToast('上传完成：成功 ' + ok + ' 张' + (fail ? '，失败 ' + fail + ' 张' : '') + ' 📸');
+});
+
+photoGridEl.addEventListener('click', async e => {
+  const del = e.target.closest('[data-del-photo]');
+  if (del) {
+    e.stopPropagation();
+    if (!authState.user) { showToast('请先登录 🔐'); openAuth('login'); return; }
+    if (!confirm('确定删除这张照片吗？')) return;
+    const id = del.getAttribute('data-del-photo');
+    const item = currentData.photos.find(x => x.id === id);
+    try {
+      if (item) await data.deletePhoto(item);
+      await data.remove('photos', id);
+      showToast('照片已删除');
+    } catch(err){}
+    return;
+  }
+  const item = e.target.closest('.photo-item');
+  if (item) {
+    const idx = parseInt(item.getAttribute('data-idx'), 10);
+    const p = currentData.photos[idx];
+    if (p) openLightbox(p.url || p.data);
+  }
+});
+
+/* ----- 消消乐 ----- */
+const GAME_ROWS = 8, GAME_COLS = 8;
+const TILE_TYPES = ['🍎','🍇','🍊','🍋','🍉','🍓','🫐'];
+let board = [], selected = null, gameBusy = false, gameScore = 0, gameInited = false;
+const boardEl = document.getElementById('gameBoard');
+const scoreEl = document.getElementById('gameScore');
+
+function randomTile(){ return TILE_TYPES[Math.floor(Math.random()*TILE_TYPES.length)]; }
+
+function initGame(){
+  gameInited = true;
+  gameScore = 0; selected = null; gameBusy = false;
+  updateScore();
+  board = [];
+  for (let r=0;r<GAME_ROWS;r++){
+    board[r] = [];
+    for (let c=0;c<GAME_COLS;c++){
+      let t, guard = 0;
+      do {
+        t = randomTile(); guard++;
+      } while (guard < 60 && (
+        (c>=2 && board[r][c-1]===t && board[r][c-2]===t) ||
+        (r>=2 && board[r-1][c]===t && board[r-2][c]===t)
+      ));
+      board[r][c] = t;
+    }
+  }
+  if (findMatches().length || !hasMoves()) { initGame(); return; }
+  renderGame();
+}
+
+function findMatches(){
+  const matched = {};
+  let run, k;
+  for (let r=0;r<GAME_ROWS;r++){
+    run = 1;
+    for (let c=1;c<=GAME_COLS;c++){
+      if (c<GAME_COLS && board[r][c] && board[r][c]===board[r][c-1]) run++;
+      else {
+        if (run >= 3) for (k=c-run;k<c;k++) matched[r+','+k]=true;
+        run = 1;
+      }
+    }
+  }
+  for (let c=0;c<GAME_COLS;c++){
+    run = 1;
+    for (let r=1;r<=GAME_ROWS;r++){
+      if (r<GAME_ROWS && board[r][c] && board[r][c]===board[r-1][c]) run++;
+      else {
+        if (run >= 3) for (k=r-run;k<r;k++) matched[k+','+c]=true;
+        run = 1;
+      }
+    }
+  }
+  return Object.keys(matched).map(s => {
+    const p = s.split(',');
+    return [parseInt(p[0],10), parseInt(p[1],10)];
+  });
+}
+function swapCells(a, b){
+  const t = board[a[0]][a[1]];
+  board[a[0]][a[1]] = board[b[0]][b[1]];
+  board[b[0]][b[1]] = t;
+}
+function hasMoves(){
+  for (let r=0;r<GAME_ROWS;r++){
+    for (let c=0;c<GAME_COLS;c++){
+      if (c+1<GAME_COLS){
+        swapCells([r,c],[r,c+1]);
+        const ok = findMatches().length > 0;
+        swapCells([r,c],[r,c+1]);
+        if (ok) return true;
+      }
+      if (r+1<GAME_ROWS){
+        swapCells([r,c],[r+1,c]);
+        const ok = findMatches().length > 0;
+        swapCells([r,c],[r+1,c]);
+        if (ok) return true;
+      }
+    }
+  }
+  return false;
+}
+function renderGame(){
+  let html = '';
+  for (let r=0;r<GAME_ROWS;r++){
+    for (let c=0;c<GAME_COLS;c++){
+      const v = board[r][c];
+      const sel = selected && selected[0]===r && selected[1]===c;
+      html += '<div class="game-tile' + (v===null?' empty':'') + (sel?' selected':'')
+           +  '" data-r="'+r+'" data-c="'+c+'">' + (v===null?'':v) + '</div>';
+    }
+  }
+  boardEl.innerHTML = html;
+}
+function updateScore(){ scoreEl.textContent = gameScore; }
+
+async function resolveMatches(){
+  let matches = findMatches();
+  let combo = 0;
+  while (matches.length){
+    combo++;
+    gameScore += matches.length * 10 * combo;
+    updateScore();
+    matches.forEach(m => { board[m[0]][m[1]] = null; });
+    renderGame();
+    await sleep(140);
+
+    for (let c=0;c<GAME_COLS;c++){
+      let writeRow = GAME_ROWS - 1;
+      for (let r=GAME_ROWS-1;r>=0;r--){
+        if (board[r][c] !== null){
+          board[writeRow][c] = board[r][c];
+          if (writeRow !== r) board[r][c] = null;
+          writeRow--;
+        }
+      }
+      for (let r2=writeRow;r2>=0;r2--) board[r2][c] = randomTile();
+    }
+    renderGame();
+    await sleep(140);
+    matches = findMatches();
+  }
+  if (!hasMoves()){
+    showToast('没有可消除的组合，重新洗牌 🔄');
+    await sleep(400);
+    initGame();
+  }
+}
+
+async function handleTileClick(r, c){
+  if (gameBusy || board[r][c] === null) return;
+  if (!selected){ selected = [r,c]; renderGame(); return; }
+  if (selected[0]===r && selected[1]===c){ selected = null; renderGame(); return; }
+  const adj = Math.abs(selected[0]-r) + Math.abs(selected[1]-c) === 1;
+  if (!adj){ selected = [r,c]; renderGame(); return; }
+
+  const a = selected, b = [r,c];
+  selected = null; gameBusy = true;
+  swapCells(a, b); renderGame();
+  await sleep(140);
+  if (findMatches().length === 0){
+    swapCells(a, b); renderGame();
+  } else {
+    await resolveMatches();
+  }
+  gameBusy = false;
+}
+boardEl.addEventListener('click', e => {
+  const tile = e.target.closest('.game-tile');
+  if (!tile) return;
+  handleTileClick(parseInt(tile.getAttribute('data-r'),10), parseInt(tile.getAttribute('data-c'),10));
+});
+document.getElementById('newGameBtn').onclick = () => {
+  if (gameBusy) return;
+  initGame();
+  showToast('新的一局开始啦 🎮');
+};
+
+/* ----- 班级成员 ----- */
+const membersArea = document.getElementById('membersArea');
+renderers.members = arr => {
+  renderMemberGroup('teacherList', arr.filter(m => m.category === '教师'), '还没有登记老师，点击右上角添加');
+  renderMemberGroup('studentList', arr.filter(m => m.category === '学生'), '还没有登记同学，点击右上角添加');
+};
+function renderMemberGroup(elId, arr, emptyText){
+  const el = document.getElementById(elId);
+  if (!arr.length){
+    el.innerHTML = '<p class="mini-empty">'+esc(emptyText)+'</p>';
+    return;
+  }
+  el.innerHTML = arr.map(m => {
+    const avatar = m.category === '教师' ? '👩‍🏫' : '🧑‍🎓';
+    return '<div class="member-card">'
+      + '<div class="member-avatar">'+avatar+'</div>'
+      + '<div class="member-info">'
+      +   '<h4>'+esc(m.name)
+      +   (m.role ? ' <span class="member-role">'+esc(m.role)+'</span>' : '')
+      +   '</h4>'
+      +   (m.note ? '<p>'+esc(m.note)+'</p>' : '')
+      + '</div>'
+      + '<div class="member-actions">'
+      +   '<button class="icon-btn" data-edit-member="'+m.id+'" title="编辑">✎</button>'
+      +   '<button class="icon-btn danger" data-del-member="'+m.id+'" title="删除">✕</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+function openMemberForm(existing){
+  showForm({
+    title: existing ? '编辑成员信息' : '添加班级成员',
+    submitText: existing ? '保存修改' : '添加成员',
+    fields: [
+      {key:'category', label:'类别', type:'select',
+        options:[{value:'教师',label:'教师'},{value:'学生',label:'同学'}], default:'学生'},
+      {key:'name', label:'姓名', type:'text', placeholder:'例如：张老师 / 李小明', required:true},
+      {key:'role', label:'职务（可不填）', type:'text', placeholder:'例如：班主任、班长、数学课代表'},
+      {key:'note', label:'备注（可不填）', type:'textarea', placeholder:'例如：教数学、喜欢打篮球……'}
+    ],
+    values: existing || {},
+    onSubmit: async d => {
+      if (existing) {
+        await data.update('members', existing.id, d);
+      } else {
+        await data.add('members', Object.assign({ts:Date.now()}, d));
+      }
+      showToast(existing ? '成员信息已更新' : '成员已添加 👥');
+    }
+  });
+}
+document.getElementById('addMemberBtn').onclick = () => openMemberForm(null);
+membersArea.addEventListener('click', async e => {
+  const ed = e.target.closest('[data-edit-member]');
+  const dl = e.target.closest('[data-del-member]');
+  if (ed){
+    const m = currentData.members.find(x => x.id === ed.getAttribute('data-edit-member'));
+    if (m) openMemberForm(m);
+  }
+  if (dl){
+    if (!confirm('确定删除这位成员吗？')) return;
+    try { await data.remove('members', dl.getAttribute('data-del-member')); showToast('已删除'); }
+    catch(err){}
+  }
+});
+
+/* ----- 文章 / 新闻 ----- */
+function makeArticleRenderer(listId, emptyId, kind){
+  const listEl = document.getElementById(listId);
+  const emptyEl = document.getElementById(emptyId);
+  return arr => {
+    if (!arr.length){
+      listEl.innerHTML = '';
+      emptyEl.style.display = 'block';
+      return;
+    }
+    emptyEl.style.display = 'none';
+    const kindLabel = kind === 'news' ? '📰 班级新闻' : '';
+    listEl.innerHTML = arr.map(a =>
+      '<article class="article-card">'
+      + '<div class="article-head">'
+      +   '<h3>'+esc(a.title)+'</h3>'
+      +   '<div class="card-actions" style="position:static;">'
+      +     '<button class="icon-btn" data-edit-'+kind+'="'+a.id+'" title="编辑">✎</button>'
+      +     '<button class="icon-btn danger" data-del-'+kind+'="'+a.id+'" title="删除">✕</button>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="article-meta">'
+      +   (kind === 'news' ? '<span>'+kindLabel+'</span>' : (a.author ? '<span>✍️ '+esc(a.author)+'</span>' : ''))
+      +   (a.authorName ? '<span>👤 '+esc(a.authorName)+'</span>' : '')
+      +   (a.date ? '<span>📅 '+esc(fmtDate(a.date))+'</span>' : '')
+      + '</div>'
+      + '<p class="article-body">'+esc(a.body)+'</p>'
+      + (a.body && a.body.length > 120 ? '<div class="article-more">点击展开全文 ▾</div>' : '')
+      + '</article>'
+    ).join('');
+  };
+}
+renderers.articles = makeArticleRenderer('articlesList', 'articlesEmpty', 'article');
+renderers.news = makeArticleRenderer('newsList', 'newsEmpty', 'news');
+
+function openArticleForm(existing){
+  showForm({
+    title: existing ? '编辑文章' : '写一篇文章',
+    submitText: existing ? '保存修改' : '发表文章',
+    fields: [
+      {key:'title', label:'标题', type:'text', placeholder:'给文章起个名字', required:true},
+      {key:'author', label:'作者（可不填）', type:'text', placeholder:'你的名字或笔名'},
+      {key:'date', label:'日期', type:'date', default: todayStr()},
+      {key:'body', label:'正文', type:'textarea', placeholder:'写下你的想法……', required:true}
+    ],
+    values: existing || {},
+    onSubmit: async d => {
+      if (existing) await data.update('articles', existing.id, d);
+      else await data.add('articles', Object.assign({ts:Date.now()}, d));
+      showToast(existing ? '文章已更新' : '文章已发表 ✍️');
+    }
+  });
+}
+function openNewsForm(existing){
+  showForm({
+    title: existing ? '编辑新闻' : '发布班级新闻',
+    submitText: existing ? '保存修改' : '发布新闻',
+    fields: [
+      {key:'title', label:'新闻标题', type:'text', placeholder:'例如：本周班级大扫除安排', required:true},
+      {key:'date', label:'日期', type:'date', default: todayStr()},
+      {key:'body', label:'新闻内容', type:'textarea', placeholder:'写清楚时间、地点、事件……', required:true}
+    ],
+    values: existing || {},
+    onSubmit: async d => {
+      if (existing) await data.update('news', existing.id, d);
+      else await data.add('news', Object.assign({ts:Date.now()}, d));
+      showToast(existing ? '新闻已更新' : '新闻已发布 📰');
+    }
+  });
+}
+document.getElementById('addArticleBtn').onclick = () => openArticleForm(null);
+document.getElementById('addArticleBtn2').onclick = () => openArticleForm(null);
+document.getElementById('addNewsBtn').onclick = () => openNewsForm(null);
+document.getElementById('addNewsBtn2').onclick = () => openNewsForm(null);
+
+function bindArticleList(listId, kind, formOpener){
+  const listEl = document.getElementById(listId);
+  listEl.addEventListener('click', async e => {
+    const ed = e.target.closest('[data-edit-'+kind+']');
+    const dl = e.target.closest('[data-del-'+kind+']');
+    if (ed){
+      const a = currentData[kind === 'article' ? 'articles' : 'news']
+        .find(x => x.id === ed.getAttribute('data-edit-'+kind));
+      if (a) formOpener(a);
+      return;
+    }
+    if (dl){
+      if (!confirm('确定删除吗？')) return;
+      const collName = kind === 'article' ? 'articles' : 'news';
+      try { await data.remove(collName, dl.getAttribute('data-del-'+kind)); showToast('已删除'); }
+      catch(err){}
+      return;
+    }
+    const body = e.target.closest('.article-body');
+    if (body){
+      body.classList.toggle('expanded');
+      const more = body.closest('.article-card').querySelector('.article-more');
+      if (more) more.textContent = body.classList.contains('expanded') ? '收起 ▴' : '点击展开全文 ▾';
+    }
+  });
+}
+bindArticleList('articlesList', 'article', openArticleForm);
+bindArticleList('newsList', 'news', openNewsForm);
+
+/* ----- 大图 ----- */
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+function openLightbox(src){
+  lightboxImg.src = src;
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(){
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => { lightboxImg.src = ''; }, 250);
+}
+document.getElementById('lightboxClose').onclick = closeLightbox;
+lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+
+/* ============ 9. 压缩图片 ============ */
+function compressImage(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = data.isCloud ? 1600 : 900;
+        const quality = data.isCloud ? 0.82 : 0.72;
+        let w = img.width, h = img.height;
+        if (w > h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
+        else if (h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ============ 10. 启动 ============ */
+const currentData = { records:[], photos:[], members:[], articles:[], news:[] };
+
+const statusEl = document.getElementById('cloudStatus');
+const statusTextEl = document.getElementById('cloudStatusText');
+if (data.isCloud){
+  statusEl.classList.remove('local');
+  statusEl.classList.add('cloud');
+  statusTextEl.textContent = '☁️ 已连接云端，登录后即可添加内容，所有记录自动共享';
+  document.getElementById('photoNote').textContent = '💡 照片保存在云端，所有登录的同学都能看到。';
+} else {
+  statusTextEl.textContent = '⚠️ 当前为本地模式（未连接 Firebase），内容只保存在本机';
+  document.getElementById('photoNote').textContent = '💡 本地模式下照片存在本机，换设备或清除数据会丢失。';
+}
+
+COLLECTIONS.forEach(name => {
+  data.subscribe(name, arr => {
+    currentData[name] = arr;
+    if (renderers[name]) renderers[name](arr);
+  });
+});
+</script>
+</body>
+</html>
